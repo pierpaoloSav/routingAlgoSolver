@@ -1,0 +1,14 @@
+# Folders
+.git/
+.vscode/
+build/
+
+# Files
+*.exe
+*.log
+*.obj
+*.o
+
+# OS files
+Thumbs.db
+.DS_Store

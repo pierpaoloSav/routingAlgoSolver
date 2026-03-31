@@ -5,6 +5,12 @@ project(RoutingAlgoSolver)
 # Try to find a locally installed raylib, but don't quit on fail
 find_package(raylib 5.5 QUIET)
 
+#Static link some c++ libraries on windows
+if(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -static")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -lpthread")
+endif()
+
 # This code downloads raylib into a directory called _deps and adds it as a subdirectory, compiling it with the program when running the build command
 include(FetchContent)
 if (NOT raylib_FOUND)
@@ -37,6 +43,7 @@ add_executable(${PROJECT_NAME}
     src/core/backend/Edge.cpp
     src/core/backend/EdgeHelper.cpp
     src/core/backend/Graph.cpp
+    src/core/backend/routingAlgos.cpp
 
     src/core/frontend/Window.cpp
     src/core/frontend/TextCase.cpp

@@ -5,7 +5,7 @@ void Graph::addUndirectedEdge(int node, int node1, int weight)
     // Resize list
     if (node >= m_adj.size() || node1 >= m_adj.size())
     {
-        m_adj.resize(std::max(node, node1)+1);
+        m_adj.resize(max(node, node1)+1);
     }
 
     // If already exists delete and add the new one
@@ -32,7 +32,7 @@ void Graph::addDirectedEdge(int node, int node1, int weight)
    // Resize list
     if (node >= m_adj.size() || node1 >= m_adj.size())
     {
-        m_adj.resize(std::max(node, node1)+1);
+        m_adj.resize(max(node, node1)+1);
     }
 
     // If already exists delete and add the new one
@@ -52,7 +52,7 @@ void Graph::deleteNode(int node)
     if (node < 0 || node >= m_adj.size()) return;
 
     // Delete all the edges from the node
-    m_adj[node] = std::vector<std::pair<int,int>>();
+    m_adj[node] = vector<pair<int,int>>();
 
     // Delete all the edges to the node from others
     for (size_t i = 0; i < m_adj.size(); i++) 
@@ -64,6 +64,12 @@ void Graph::deleteNode(int node)
             else
                 ++it;
         }
+    }
+
+    // Memory optimization
+    while (m_adj.size() > 1 && m_adj.back().empty())
+    {
+        m_adj.pop_back();
     }
 }
 
@@ -79,18 +85,24 @@ void Graph::deleteEdge(int node, int node1)
         else
             ++it;
     }
+
+    // Memory optimization
+    while (m_adj.size() > 1 && m_adj.back().empty())
+    {
+        m_adj.pop_back();
+    }
 }
 
 void Graph::printAdj() {
     for (int i = 0; i < m_adj.size(); i++) 
     {
-        std::cout << "Nodo " << i << " -> ";
+        cout << "Nodo " << i << " -> ";
 
         for (const auto& [v, peso] :m_adj[i]) 
         {
-            std::cout << "(" << v << ", " << peso << ") ";
+            cout << "(" << v << ", " << peso << ") ";
         }
 
-        std::cout << std::endl;
+        cout << endl;
     }
 }

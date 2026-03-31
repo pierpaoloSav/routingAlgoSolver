@@ -18,4 +18,5 @@ public:
 private:
     std::vector<Edge> m_edges;
     Vec2 m_lastP = {-1, -1};
+    bool placing = false;
 };

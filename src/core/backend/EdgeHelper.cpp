@@ -17,7 +17,7 @@ bool EdgeHelper::addDirectedEdge(Vec2 p, int weight, std::vector<Node>& nodes)
 
     // If already in placing state (m_lastP has a value) add the edge 
     // else put in placing state
-    if (m_lastP.x >= 0)
+    if (placing)
     {
         // Nodes has to be different
         if (c.x == m_lastP.x && c.y == m_lastP.y) return false;
@@ -38,6 +38,7 @@ bool EdgeHelper::addDirectedEdge(Vec2 p, int weight, std::vector<Node>& nodes)
         // Add edge and reset
         m_edges.push_back(Edge({m_lastP.x, m_lastP.y}, {c.x, c.y}, weight, nodes));
         m_lastP = {-1, -1};
+        placing = false;
 
         return true;
     }
@@ -45,6 +46,7 @@ bool EdgeHelper::addDirectedEdge(Vec2 p, int weight, std::vector<Node>& nodes)
     {
         // Put in placing state by giving m_lastP a value
         m_lastP = {c.x, c.y};
+        placing = true;
 
         return false;
     }
@@ -67,7 +69,7 @@ bool EdgeHelper::addUndirectedEdge(Vec2 p, int weight, std::vector<Node> &nodes)
 
     // If already in placing state (m_lastP has a value) add the edge 
     // else put in placing state
-    if (m_lastP.x >= 0)
+    if (placing)
     {
         // Nodes has to be different
         if (c.x == m_lastP.x && c.y == m_lastP.y) return false;
@@ -89,6 +91,7 @@ bool EdgeHelper::addUndirectedEdge(Vec2 p, int weight, std::vector<Node> &nodes)
         m_edges.push_back(Edge({m_lastP.x, m_lastP.y}, {c.x, c.y}, weight, nodes));
         m_edges.push_back(Edge({c.x, c.y}, {m_lastP.x, m_lastP.y}, weight, nodes));
         m_lastP = {-1, -1};
+        placing = false;
 
         return true;
     }
@@ -96,6 +99,7 @@ bool EdgeHelper::addUndirectedEdge(Vec2 p, int weight, std::vector<Node> &nodes)
     {
         // Put in placing state by giving m_lastP a value
         m_lastP = {c.x, c.y};
+        placing = true;
 
         return false;
     }
@@ -121,8 +125,8 @@ std::pair<int, int> EdgeHelper::deleteEdge(Vec2 p, int n)
         Vec2 p1 = it->getP1();
 
         // Direction vector from p0 to p1
-        Vec2 dir = {p1.x - p0.x, p1.y - p0.y};
-
+        Vec2f dir = {(float)(p1.x - p0.x), (float)(p1.y - p0.y)};
+        
         // Normalize direction
         float length = sqrt(dir.x * dir.x + dir.y * dir.y);
         if (length != 0)
@@ -131,9 +135,9 @@ std::pair<int, int> EdgeHelper::deleteEdge(Vec2 p, int n)
             dir.y /= length;
         }
 
-        // Take the endpoint p1 and move it ~20 units along the segment direction
-        Vec2 t = {p1.x + dir.x * 20, p1.y + dir.y * 20};
-        if (distance(p, t) < 40)
+        
+        Vec2f t = {(float)p1.x - dir.x * 30, (float)p1.y - dir.y * 30};
+        if (distance(Vec2f(p), t) < 10)
         {
             std::pair<int, int> p(it->getNode(), it->getNode1());
             it = m_edges.erase(it);

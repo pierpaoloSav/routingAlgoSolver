@@ -1,7 +1,10 @@
 #pragma once
 
 #include <vector>
+
 #include <iostream>
+
+using namespace std;
 
 class Graph
 {
@@ -12,10 +15,12 @@ public:
     void deleteNode(int node);
     void deleteEdge(int node, int node1);
 
-    std::vector<int> dijkstra(int src);
+    vector<pair<int,vector<int>>> dijkstra(int src, bool *error);
+    vector<vector<int>> getPaths(vector<pair<int,vector<int>>> &dist, int src, int target);
+    vector<pair<int,vector<int>>> bellmanFord(int src, bool *error);
 
     void printAdj();
 
 private:
-    std::vector<std::vector<std::pair<int,int>>> m_adj = {{}};
+    vector<vector<pair<int,int>>> m_adj = {{}};
 };

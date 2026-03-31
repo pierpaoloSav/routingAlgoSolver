@@ -22,11 +22,14 @@ private:
 
 private:
     Window window;
+    Camera2D camera;
 
     int xMargin = WIDTH-70;
     int yMargin = HEIGHT-50;
 
     TextCase weightTCase;
+    TextCase srcTCase;
+    TextCase targetTCase;
     Button dijkstraButton;
     Button fordButton;
     Checkbox directionCheckbox;

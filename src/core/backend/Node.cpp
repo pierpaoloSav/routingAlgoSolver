@@ -1,4 +1,3 @@
-#include <cmath>
 #include "Node.h"
 
 Node::Node(Vec2 c, int radius, std::string title) :

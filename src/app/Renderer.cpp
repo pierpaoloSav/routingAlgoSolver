@@ -116,9 +116,11 @@ void Renderer::drawEdge(Edge &e)
 void Renderer::drawXMargin(int y, int lenght)
 {
     DrawLine(0, y, lenght, y, BLACK);
+    DrawRectangle(0, y, lenght, y, WHITE);
 }
 
 void Renderer::drawYMargin(int x, int lenght)
 {
     DrawLine(x, 0, x, lenght, BLACK);
+    DrawRectangle(x, 0, x, lenght, WHITE);
 }

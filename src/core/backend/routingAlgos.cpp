@@ -1,15 +1,15 @@
+#include <unordered_set>
 #include <set>
+#include <unordered_map>
 #include "Graph.h"
 
 // Dijkstra's algorithm as a member function of Graph.
-// - Uses m_adj as adjacency list
+// - Uses m_adj (unordered_map) as adjacency list; node indices may be non-contiguous
 // - Sets *error to true if src is invalid or a negative weight edge is found
-// - Returns vector of pairs: .first = shortest distance from src, .second = vector of predecessors
-// - On error, returns vector filled with INT_MAX and empty vectors
-vector<pair<int,vector<int>>> Graph::dijkstra(int src, bool *error)
+// - Returns unordered_map: key = node index, value = pair: .first = shortest distance from src, .second = vector of predecessors
+// - On error, returns empty unordered_map
+unordered_map<int, pair<int, vector<int>>> Graph::dijkstra(int src, bool *error)
 {
-    int V = m_adj.size();
-
     priority_queue<
         pair<int, int>,
         vector<pair<int, int>>,
@@ -17,16 +17,17 @@ vector<pair<int,vector<int>>> Graph::dijkstra(int src, bool *error)
     > pq;
 
     *error = false;
-    vector<pair<int,vector<int>>> dist(V, {INT_MAX, vector<int>()});
+    unordered_map<int, pair<int, vector<int>>> dist;
 
     // If there isn't the search node return now
-    if (src >= m_adj.size()) {*error = true; return dist;}
+    if (m_adj.find(src) == m_adj.end()) {*error = true; return dist;}
 
     dist[src] = {0, vector<int>()};
     pq.emplace(0, src);
 
     // Process the queue until all reachable vertices are finalized
-    while (!pq.empty()) {
+    while (!pq.empty()) 
+    {
         auto top = pq.top();
         pq.pop();
 
@@ -34,11 +35,14 @@ vector<pair<int,vector<int>>> Graph::dijkstra(int src, bool *error)
         int u = top.second;
 
         // If this distance not the latest shortest one, skip it
-        if (d > dist[u].first)
+        if (dist.find(u) == dist.end() || d > dist[u].first)
             continue;
 
         // Explore all neighbors of the current vertex
-        for (auto &p : m_adj[u]) {
+        auto it = m_adj.find(u);
+        if (it == m_adj.end()) continue;
+        for (auto &p : it->second) 
+        {
             int v = p.first;
             int w = p.second;
 
@@ -46,18 +50,20 @@ vector<pair<int,vector<int>>> Graph::dijkstra(int src, bool *error)
             if (w < 0)
             {
                 *error = true;
-                return vector<pair<int,vector<int>>>(V, {INT_MAX, vector<int>()});
+                return unordered_map<int, pair<int, vector<int>>>();
             }
 
             int newDist = dist[u].first + w;
 
-            if (newDist < dist[v].first) {
+            if (dist.find(v) == dist.end() || newDist < dist[v].first) 
+            {
                 dist[v].first = newDist;
                 dist[v].second.clear();
                 dist[v].second.push_back(u);
                 pq.emplace(dist[v].first, v);
             }
-            else if (newDist == dist[v].first) {
+            else if (newDist == dist[v].first) 
+            {
                 dist[v].second.push_back(u);
             }
         }
@@ -66,43 +72,62 @@ vector<pair<int,vector<int>>> Graph::dijkstra(int src, bool *error)
     return dist;
 }
 
-//TODO check and refactor
 // Bellman-Ford algorithm as a member function of Graph.
-// - Uses m_adj as adjacency list
+// - Uses m_adj (unordered_map) as adjacency list; node indices may be non-contiguous
+// - Uses an hashset to check duplicates in the predecessors
 // - Sets *error to true if src is invalid or a negative cycle is detected
-// - Returns vector of pairs: .first = distance, .second = vector of predecessors
-// - On error, returns vector filled with INT_MAX and empty vectors
-vector<pair<int,vector<int>>> Graph::bellmanFord(int src, bool *error)
+// - Returns unordered_map: key = node index, value = pair: .first = distance, .second = vector of predecessors
+// - On error, returns empty unordered_map
+unordered_map<int, pair<int, vector<int>>> Graph::bellmanFord(int src, bool *error)
 {
-    int V = m_adj.size();
     *error = false;
-    vector<pair<int,vector<int>>> dist(V, {INT_MAX, vector<int>()});
+    unordered_map<int, pair<int, vector<int>>> dist;
 
     // If src node is invalid
-    if (src < 0 || src >= V) {
+    if (m_adj.find(src) == m_adj.end()) 
+    {
         *error = true;
         return dist;
     }
 
     dist[src].first = 0;
 
+    unordered_map<int, unordered_set<int>> predSet;
+
     // Bellman-Ford main loop (V-1 times)
-    for (int i = 0; i < V - 1; ++i) {
+    int V = (int)m_adj.size();
+    for (int i = 0; i < V - 1; ++i) 
+    {
         bool updated = false;
-        for (int u = 0; u < V; ++u) {
-            if (dist[u].first == INT_MAX) continue;
-            for (auto &p : m_adj[u]) {
+        for (auto &entry : m_adj) 
+        {
+            int u = entry.first;
+            if (dist.find(u) == dist.end() || dist[u].first == INT_MAX) continue;
+            for (auto &p : entry.second) 
+            {
                 int v = p.first;
                 int w = p.second;
                 int newDist = dist[u].first + w;
-                if (newDist < dist[v].first) {
+                if (dist.find(v) == dist.end() || newDist < dist[v].first) 
+                {
                     dist[v].first = newDist;
                     dist[v].second.clear();
-                    dist[v].second.push_back(u);
+                    predSet[v].clear();
+                    if (predSet[v].find(u) == predSet[v].end())
+                    {
+                        dist[v].second.push_back(u);
+                        predSet[v].insert(u);
+                    }
                     updated = true;
-                } else if (newDist == dist[v].first) {
+                } 
+                else if (dist.find(v) != dist.end() && newDist == dist[v].first) 
+                {
                     // Multiple min paths
-                    dist[v].second.push_back(u);
+                    if (predSet[v].find(u) == predSet[v].end())
+                    {
+                        dist[v].second.push_back(u);
+                        predSet[v].insert(u);
+                    }
                 }
             }
         }
@@ -111,14 +136,19 @@ vector<pair<int,vector<int>>> Graph::bellmanFord(int src, bool *error)
     }
 
     // Check for negative-weight cycles
-    for (int u = 0; u < V; ++u) {
-        if (dist[u].first == INT_MAX) continue;
-        for (auto &p : m_adj[u]) {
+    for (auto &entry : m_adj) 
+    {
+        int u = entry.first;
+        if (dist.find(u) == dist.end() || dist[u].first == INT_MAX) continue;
+        for (auto &p : entry.second) 
+        {
             int v = p.first;
             int w = p.second;
-            if (dist[u].first + w < dist[v].first) {
+            if (dist.find(v) == dist.end()) continue;
+            if (dist[u].first + w < dist[v].first) 
+            {
                 *error = true;
-                return vector<pair<int,vector<int>>>(V, {INT_MAX, vector<int>()});
+                return unordered_map<int, pair<int, vector<int>>>();
             }
         }
     }
@@ -128,23 +158,22 @@ vector<pair<int,vector<int>>> Graph::bellmanFord(int src, bool *error)
 
 // Retrieves all minimum paths from src to target based on the predecessor information.
 // - Parameters:
-//   - dist: vector of pairs from a routing algorithm containing distances and predecessors
+//   - dist: unordered_map from a routing algorithm containing distances and predecessors
 //   - src: source node index
 //   - target: target node index
-// - Returns a vector of paths, where each path is a vector of node indices from src to target
+// - Returns a vector of paths, where each path is a vector of node indices from src to target.
+//   returns it empty if target not found
 // - Uses depth-first search to explore all possible minimum paths by traversing predecessors
-// - Checks unicity of paths with a set cause bellman ford could have duplicate paths
-// - Theoretical time big O is O(2^N · N) but in practical terms it's O(P · L · log(P))
-vector<vector<int>> Graph::getPaths(vector<pair<int,vector<int>>> &dist, int src, int target)
+// - Theoretical time big O is O(2^N) but in practical terms it's O(P · L)
+vector<vector<int>> Graph::getPaths(unordered_map<int, pair<int,vector<int>>> &dist, int src, int target)
 {
     vector<vector<int>> r;
-    set<vector<int>> uniquePaths;
     vector<int> currentPath;
 
     // Early exit if target is invalid or unreachable
-    if (target < 0 || target >= dist.size() || dist[target].first == INT_MAX) 
+    if (dist.find(target) == dist.end() || dist[target].first == INT_MAX) 
         return r;
-    if (src < 0 || src >= dist.size())
+    if (dist.find(src) == dist.end())
         return r;
 
     // Recursive DFS function (Inorder traversal)
@@ -152,7 +181,7 @@ vector<vector<int>> Graph::getPaths(vector<pair<int,vector<int>>> &dist, int src
     {
         //BASE CASES
         // Prevent errors
-        if (node < 0 || node >= dist.size()) return;
+        if (dist.find(node) == dist.end()) return;
         // Avoid cycles
         if (find(currentPath.begin(), currentPath.end(), node) != currentPath.end()) 
             return;
@@ -163,7 +192,7 @@ vector<vector<int>> Graph::getPaths(vector<pair<int,vector<int>>> &dist, int src
         if (node == src)
         {
             // Node found
-            uniquePaths.insert(vector<int>(currentPath.rbegin(), currentPath.rend()));
+            r.push_back(vector<int>(currentPath.rbegin(), currentPath.rend()));
         }
         else
         {
@@ -176,10 +205,6 @@ vector<vector<int>> Graph::getPaths(vector<pair<int,vector<int>>> &dist, int src
     };
 
     dfs(target);
-
-    // Check unicity of paths
-    for (const auto &p : uniquePaths)
-        r.push_back(p);
 
     return r;
 }

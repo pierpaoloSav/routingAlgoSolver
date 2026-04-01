@@ -49,6 +49,8 @@ add_executable(${PROJECT_NAME}
     src/core/frontend/TextCase.cpp
     src/core/frontend/Button.cpp
     src/core/frontend/Checkbox.cpp
+    src/core/frontend/OutputWindow.h
+    src/core/frontend/OutputWindow.cpp
 )
 
 # Link raylib to project

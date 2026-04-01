@@ -1,13 +1,13 @@
 #include "Graph.h"
+#include <unordered_map>
+
+void Graph::addNode(int node)
+{
+    if (m_adj.find(node) == m_adj.end()) m_adj[node] = {};
+}
 
 void Graph::addUndirectedEdge(int node, int node1, int weight)
 {
-    // Resize list
-    if (node >= m_adj.size() || node1 >= m_adj.size())
-    {
-        m_adj.resize(max(node, node1)+1);
-    }
-
     // If already exists delete and add the new one
     for (auto it = m_adj[node].begin(); it != m_adj[node].end(); ) {
         if (it->first == node1)
@@ -29,12 +29,6 @@ void Graph::addUndirectedEdge(int node, int node1, int weight)
 
 void Graph::addDirectedEdge(int node, int node1, int weight)
 {
-   // Resize list
-    if (node >= m_adj.size() || node1 >= m_adj.size())
-    {
-        m_adj.resize(max(node, node1)+1);
-    }
-
     // If already exists delete and add the new one
     for (auto it = m_adj[node].begin(); it != m_adj[node].end(); ) {
         if (it->first == node1)
@@ -49,60 +43,34 @@ void Graph::addDirectedEdge(int node, int node1, int weight)
 
 void Graph::deleteNode(int node)
 {
-    if (node < 0 || node >= m_adj.size()) return;
-
     // Delete all the edges from the node
-    m_adj[node] = vector<pair<int,int>>();
+    m_adj.erase(node);
 
     // Delete all the edges to the node from others
-    for (size_t i = 0; i < m_adj.size(); i++) 
+    for (auto& [key, edges] : m_adj) 
     {
-        for (auto it = m_adj[i].begin(); it != m_adj[i].end(); ) 
+        for (auto it = edges.begin(); it != edges.end(); ) 
         {
             if (it->first == node)
-                it = m_adj[i].erase(it);
+                it = edges.erase(it);
             else
                 ++it;
         }
-    }
-
-    // Memory optimization
-    while (m_adj.size() > 1 && m_adj.back().empty())
-    {
-        m_adj.pop_back();
     }
 }
 
 void Graph::deleteEdge(int node, int node1)
 {
-    if (node < 0 || node1 < 0) return;
-
     // Delete the edge
-    for (auto it = m_adj[node].begin(); it != m_adj[node].end(); )
-    {
-        if (it->first == node1)
-            it = m_adj[node].erase(it);
-        else
-            ++it;
-    }
-
-    // Memory optimization
-    while (m_adj.size() > 1 && m_adj.back().empty())
-    {
-        m_adj.pop_back();
-    }
-}
-
-void Graph::printAdj() {
-    for (int i = 0; i < m_adj.size(); i++) 
-    {
-        cout << "Nodo " << i << " -> ";
-
-        for (const auto& [v, peso] :m_adj[i]) 
+    auto itMap = m_adj.find(node);
+    if (itMap != m_adj.end()) {
+        auto& edges = itMap->second;
+        for (auto it = edges.begin(); it != edges.end(); )
         {
-            cout << "(" << v << ", " << peso << ") ";
+            if (it->first == node1)
+                it = edges.erase(it);
+            else
+                ++it;
         }
-
-        cout << endl;
     }
 }

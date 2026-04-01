@@ -24,6 +24,8 @@ private:
     Window window;
     Camera2D camera;
 
+    OutputWindow *ow = nullptr;
+
     int xMargin = WIDTH-70;
     int yMargin = HEIGHT-50;
 

@@ -2,7 +2,7 @@
 
 // Adds a node with p as the center
 // if inside margin and there aren't any near nodes
-void NodeHelper::addNode(Vec2 p, int radius)
+int NodeHelper::addNode(Vec2 p, int radius)
 {
     // Check near nodes
     bool add = true;
@@ -27,7 +27,11 @@ void NodeHelper::addNode(Vec2 p, int radius)
         }
 
         m_nodes.push_back(Node(p, radius, std::to_string(n)));
+
+        return n;
     }
+
+    return -1;
 }
 
 // If p inside the node it is eliminated 

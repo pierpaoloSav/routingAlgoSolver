@@ -8,7 +8,7 @@
 class NodeHelper
 {
 public:
-    void addNode(Vec2 p, int radius);
+    int addNode(Vec2 p, int radius);
     int deleteNode(Vec2 p);
 
     std::vector<Node>& getNodes();

@@ -82,16 +82,34 @@ void TextCase::render()
     else
         DrawRectangleLinesEx(m_scaled, 2, BLACK);
 
-    // Text render
-    int xMargin = m_scaled.width/37*m_scaled.width/m_case.width;
-    int yMargin = m_scaled.height/37*m_scaled.height/m_case.height *2;
-    const char *sText = m_text.c_str();
-    DrawText(sText, m_scaled.x+xMargin, m_scaled.y+yMargin, m_fontSizeScaled, BLACK);
+    float xMargin = m_scaled.width * 0.05f;   
+    float yMargin = m_scaled.height * 0.1f;  
+
+    // Text render (scrolling if too wide)
+    const char* sText = m_text.c_str();
+    float availableWidth = m_scaled.width - 2 * xMargin;
+    int textLen = m_text.length();
+    int startIdx = 0;
+    // Find substring to fit if too wide
+    if (MeasureText(sText, m_fontSizeScaled) > availableWidth) {
+        // Try to find the minimal substring from the end that fits
+        for (int i = 0; i < textLen; ++i) {
+            const char* sub = sText + i;
+            if (MeasureText(sub, m_fontSizeScaled) <= availableWidth) {
+                startIdx = i;
+                break;
+            }
+        }
+    }
+    const char* drawText = sText + startIdx;
+    DrawText(drawText, m_scaled.x + xMargin, m_scaled.y + yMargin, m_fontSizeScaled, BLACK);
 
     // Title render
-    int titleSize = m_fontSizeScaled - (m_fontSizeScaled/3);
     if (m_title)
-        DrawText(m_title, m_scaled.x+xMargin, m_scaled.y-titleSize-yMargin, titleSize, BLACK);
+    {
+        int titleSize = m_fontSizeScaled * 0.7f; // titolo leggermente più piccolo
+        DrawText(m_title, m_scaled.x + xMargin, m_scaled.y - titleSize - yMargin, titleSize, BLACK);
+    }
 }
 
 std::string TextCase::getText()

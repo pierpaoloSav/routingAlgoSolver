@@ -150,7 +150,85 @@ std::pair<int, int> EdgeHelper::deleteEdge(Vec2 p, int n)
     return std::pair<int, int>(-1, -1);
 }
 
+void EdgeHelper::clear()
+{
+    m_edges.clear();
+}
+
 std::vector<Edge> &EdgeHelper::getEdges()
 {
     return m_edges;
+}
+
+void EdgeHelper::createRandomEdges(std::vector<Node>& nodes, bool oneDirection)
+{
+    // Edge case
+    if (nodes.size() < 2) return;
+
+    // Compute approximate minimum distance between nodes (grid step)
+    float minDist = 1e9;
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+        for (size_t j = i + 1; j < nodes.size(); j++)
+        {
+            float dx = nodes[j].getX() - nodes[i].getX();
+            float dy = nodes[j].getY() - nodes[i].getY();
+            float dist = sqrt(dx * dx + dy * dy);
+            if (dist > 0 && dist < minDist)
+                minDist = dist;
+        }
+    }
+    float threshold = minDist * 1.8f; // allow neighbors + diagonals
+
+
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+        Vec2 p0 = {nodes[i].getX(), nodes[i].getY()};
+
+        bool oldDir = false;
+        for (size_t k = 0; k < 2; k++)
+        {
+            Vec2 p1;
+            int j;
+
+            bool isNeighbor;
+            do
+            {
+                j = rand()%nodes.size();
+                p1 = {nodes[j].getX(), nodes[j].getY()};
+
+                // Check if neighbor
+                int dx = p1.x - p0.x;
+                int dy = p1.y - p0.y;
+                float dist = sqrt(dx * dx + dy * dy);
+                isNeighbor = (dist > 0 && dist <= threshold);
+            } while (!isNeighbor);
+                
+            // Calculate the edge attributs
+            int weight = rand() % 50; // weight 0-50
+            bool directed = rand() % 2 || oneDirection;
+            // Add the edge
+            if (directed)
+            {
+                placing = true;
+                if (oldDir)
+                {
+                    m_lastP = p1;
+                    this->addDirectedEdge(p0, weight, nodes);
+                }
+                else
+                {
+                    m_lastP = p0;
+                    this->addDirectedEdge(p1, weight, nodes);
+                }
+            }
+            else
+            {
+                placing = true;
+                m_lastP = p0;
+                this->addUndirectedEdge(p1, weight, nodes);
+            }
+            oldDir = directed;
+        }
+    }
 }

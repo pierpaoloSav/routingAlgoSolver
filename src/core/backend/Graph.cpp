@@ -1,5 +1,4 @@
 #include "Graph.h"
-#include <unordered_map>
 
 void Graph::addNode(int node)
 {
@@ -73,4 +72,9 @@ void Graph::deleteEdge(int node, int node1)
                 ++it;
         }
     }
+}
+
+void Graph::clear()
+{
+    m_adj = unordered_map<int, vector<pair<int,int>>>();
 }

@@ -4,7 +4,10 @@ Application::Application(int screenWidth, int screenHeight, const char* title) :
     window(screenWidth, screenHeight, title),
 
     weightTCase(WIDTH-50-10, 10, 50, 10, 9),
-    directionCheckbox(WIDTH-10-30, 40, 10, "Directed"),
+    directionCheckbox(WIDTH-10-30, 10+10+20, 10, "Directed"),
+    defButton1(WIDTH-30-20, 40+10+20, 30, 10, "Def. 1", 8),
+    defButton2(WIDTH-30-20, 70+10+20, 30, 10, "Def. 2", 8),
+    defButton3(WIDTH-30-20, 100+10+20, 30, 10, "Def. 3", 8),
 
     srcTCase(10, HEIGHT-10-20, 30, 10, 9),
     targetTCase(10+30+10, HEIGHT-10-20, 30, 10, 9),
@@ -39,12 +42,16 @@ Application::Application(int screenWidth, int screenHeight, const char* title) :
     xMargin = (WIDTH-70)*xScale;
     yMargin = (HEIGHT-50)*yScale;
 
+    weightTCase.setScale(xScale, yScale);
+    directionCheckbox.setScale(xScale, yScale);
+    defButton1.setScale(xScale, yScale);
+    defButton2.setScale(xScale, yScale);
+    defButton3.setScale(xScale, yScale);
+
     srcTCase.setScale(xScale, yScale);
     targetTCase.setScale(xScale, yScale);
-    weightTCase.setScale(xScale, yScale);
     dijkstraButton.setScale(xScale, yScale);
     fordButton.setScale(xScale, yScale);
-    directionCheckbox.setScale(xScale, yScale);
 }
 
 Application::~Application()
@@ -144,8 +151,21 @@ void Application::Loop()
         // Src and Target input
         srcTCase.event();
         targetTCase.event();
+        // Default graphs inputs
+        if (defButton1.pressed())
+            randomGraph(5, true);
+        if (defButton2.pressed())
+            randomGraph(10, true);
+        if (defButton3.pressed())
+            randomGraph(rand()%11+10, false);
 
         // Modifying Graph
+        if (IsKeyPressed(KEY_C))
+        {
+            nodes.clear();
+            edges.clear();
+            graph.clear();
+        }
         if (!mouseOnUI)
         {
             // Adding Elements
@@ -225,12 +245,16 @@ void Application::Loop()
         xMargin = (WIDTH-70)*xScale;
         yMargin = (HEIGHT-50)*yScale;
 
+        weightTCase.setScale(xScale, yScale);
+        directionCheckbox.setScale(xScale, yScale);
+        defButton1.setScale(xScale, yScale);
+        defButton2.setScale(xScale, yScale);
+        defButton3.setScale(xScale, yScale);
+
         srcTCase.setScale(xScale, yScale);
         targetTCase.setScale(xScale, yScale);
-        weightTCase.setScale(xScale, yScale);
         dijkstraButton.setScale(xScale, yScale);
         fordButton.setScale(xScale, yScale);
-        directionCheckbox.setScale(xScale, yScale);
         if (ow) ow->setScale(xScale, yScale);
     }
 }
@@ -240,28 +264,56 @@ void Application::Render()
     BeginDrawing();
     ClearBackground(WHITE);
 
-    // Elements moving on the screen (graph elements)
-    BeginMode2D(camera);
+        // Elements moving on the screen (graph elements)
+        BeginMode2D(camera);
 
-    for (auto &n : nodes.getNodes())
-        Renderer::drawNode(n);
-    for (auto &e : edges.getEdges())
-        Renderer::drawEdge(e);
+            for (auto &n : nodes.getNodes())
+                Renderer::drawNode(n);
+            for (auto &e : edges.getEdges())
+                Renderer::drawEdge(e);
 
-    
+        EndMode2D();
 
-    EndMode2D();
-
-    // Elements fixed on the screen
-    Renderer::drawXMargin(yMargin, WIDTH*(float)GetScreenWidth()/(float)WIDTH);
-    Renderer::drawYMargin(xMargin, HEIGHT*(float)GetScreenHeight()/(float)HEIGHT);
-    weightTCase.render();
-    srcTCase.render();
-    targetTCase.render();
-    dijkstraButton.render();
-    fordButton.render();
-    directionCheckbox.render();
-    if (ow) ow->render();
+        // Elements fixed on the screen
+        Renderer::drawXMargin(yMargin, WIDTH*(float)GetScreenWidth()/(float)WIDTH);
+        Renderer::drawYMargin(xMargin, HEIGHT*(float)GetScreenHeight()/(float)HEIGHT);
+        weightTCase.render();
+        directionCheckbox.render();
+        defButton1.render();
+        defButton2.render();
+        defButton3.render();
+        
+        srcTCase.render();
+        targetTCase.render();
+        dijkstraButton.render();
+        fordButton.render();
+        if (ow) ow->render();
 
     EndDrawing();
+}
+
+void Application::randomGraph(int n, bool oneDirection)
+{
+    // Clear
+    nodes.clear();
+    edges.clear();
+
+    graph.clear();
+
+    // Build graph
+    camera.target = { (float)GetScreenWidth()/2, (float)GetScreenHeight()/2 };
+    camera.offset = { (float)GetScreenWidth()/2, (float)GetScreenHeight()/2 };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+
+    nodes.createDefaultGraph({100, 100}, n, NODE_RADIUS);
+    edges.createRandomEdges(nodes.getNodes(), oneDirection);
+
+    for (int i = 0; i < n; i++)
+        graph.addNode(i);
+    
+    for (int i = 0; i < edges.getEdges().size(); i++)
+        graph.addDirectedEdge(edges.getEdges()[i].getNode(),
+                                edges.getEdges()[i].getNode1(),
+                                edges.getEdges()[i].getWeight());
 }

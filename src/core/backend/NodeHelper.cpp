@@ -53,7 +53,50 @@ int NodeHelper::deleteNode(Vec2 p)
     return -1;
 }
 
+void NodeHelper::clear()
+{
+    m_nodes.clear();
+    m_deleted = std::priority_queue<int, std::vector<int>, std::greater<int>>();
+}
+
 std::vector<Node> &NodeHelper::getNodes()
 {
     return m_nodes;
+}
+
+void NodeHelper::createDefaultGraph(Vec2 start, int n, int radius)
+{
+    int count = (n < 5) ? 5 : n;
+
+    int spacing = 200;
+
+    this->addNode(start, radius);
+
+    int created = 1;
+    int row = 0;
+    int col = 1;
+
+    while (created < count)
+    {
+        Vec2 pos(
+            start.x + col * spacing,
+            start.y + row * spacing
+        );
+
+        if (col == 1 && row%2 == 1)
+        {
+            pos.y += radius*3;
+        }
+
+        this->addNode(pos, radius);
+
+        created++;
+        col++;
+
+        if (col > 2)
+        {
+            col = 0;
+            row++;
+        }
+    }
 }

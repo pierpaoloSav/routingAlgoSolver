@@ -20,6 +20,8 @@ private:
     void Loop();
     void Render();
 
+    void randomGraph(int n, bool oneDirection);
+
 private:
     Window window;
     Camera2D camera;
@@ -30,11 +32,16 @@ private:
     int yMargin = HEIGHT-50;
 
     TextCase weightTCase;
+    Checkbox directionCheckbox;
+    Button defButton1;
+    Button defButton2;
+    Button defButton3;
+    
     TextCase srcTCase;
     TextCase targetTCase;
     Button dijkstraButton;
     Button fordButton;
-    Checkbox directionCheckbox;
+    
 
     NodeHelper nodes;
     EdgeHelper edges;

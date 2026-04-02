@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <utility>
 #include"vecMath.h"
 #include "Edge.h"
 #include "Node.h"
@@ -10,8 +11,11 @@ class EdgeHelper
 public:
     bool addDirectedEdge(Vec2 p, int weight, std::vector<Node>& nodes);
     bool addUndirectedEdge(Vec2 p, int weight, std::vector<Node>& nodes);
-    
+
     std::pair<int, int> deleteEdge(Vec2 p, int n);
+    void clear();
+
+    void createRandomEdges(std::vector<Node>& nodes, bool oneDirection);
 
     std::vector<Edge>& getEdges();
     

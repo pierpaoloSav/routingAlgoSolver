@@ -12,21 +12,23 @@ This project is a software application that gives a simple and practical UI to t
 * This is a school project.
 
 ## Example
-Fill directly on github
+<img width="961" height="542" alt="appScreenshot" src="https://github.com/user-attachments/assets/81fed35c-9667-4e37-b7bd-8d1b1c338bc4" />
+<img width="961" height="542" alt="outputScreenshot" src="https://github.com/user-attachments/assets/ec508173-d164-4b6a-9b4e-0daf680ab991" />
 
 ## Compilation Instructions
 ### Requirements
 - CMake
-- A C++ compiler
+- A C++17 compatible compiler (e.g. clang++ or g++/MinGW)
 
 The project is built with CMake.
 On Windows, you can use Ninja instead of Make.
 
 1. Raylib is automatically included via FetchContent in CMake if it is not installed locally.
-2. `mkdir build && cd build`
-3. `cmake ..`
-4. `make`
-5. Run the generated executable.
+2. `mkdir build`
+3. `cd build`
+4. `cmake ..`
+5. `make`
+6. Run the generated executable.
 
 ## Commands
 

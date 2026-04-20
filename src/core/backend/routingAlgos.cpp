@@ -75,7 +75,7 @@ unordered_map<int, pair<int, vector<int>>> Graph::dijkstra(int src, bool *error)
 // - Sets *error to true if src is invalid or a negative cycle is detected
 // - Returns unordered_map: key = node index, value = pair: .first = distance, .second = vector of predecessors
 // - On error, returns empty unordered_map
-unordered_map<int, pair<int, vector<int>>> Graph::bellmanFord(int src, bool *error)
+unordered_map<int, pair<int, vector<int>>> Graph::bellmanFord(int src, int cycles, bool *error)
 {
     *error = false;
     unordered_map<int, pair<int, vector<int>>> dist;
@@ -93,7 +93,8 @@ unordered_map<int, pair<int, vector<int>>> Graph::bellmanFord(int src, bool *err
 
     // Bellman-Ford main loop (V-1 times)
     int V = (int)m_adj.size();
-    for (int i = 0; i < V - 1; ++i) 
+    cycles = min(cycles, V-1);
+    for (int i = 0; i < cycles; ++i) 
     {
         bool updated = false;
         for (auto &entry : m_adj) 
@@ -132,20 +133,23 @@ unordered_map<int, pair<int, vector<int>>> Graph::bellmanFord(int src, bool *err
         if (!updated) break;
     }
 
-    // Check for negative-weight cycles
-    for (auto &entry : m_adj) 
+    // Check for negative-weight cycles (only for V-1 cycles)
+    if (cycles == V-1)
     {
-        int u = entry.first;
-        if (dist.find(u) == dist.end() || dist[u].first == INT_MAX) continue;
-        for (auto &p : entry.second) 
+        for (auto &entry : m_adj) 
         {
-            int v = p.first;
-            int w = p.second;
-            if (dist.find(v) == dist.end()) continue;
-            if (dist[u].first + w < dist[v].first) 
+            int u = entry.first;
+            if (dist.find(u) == dist.end() || dist[u].first == INT_MAX) continue;
+            for (auto &p : entry.second) 
             {
-                *error = true;
-                return unordered_map<int, pair<int, vector<int>>>();
+                int v = p.first;
+                int w = p.second;
+                if (dist.find(v) == dist.end()) continue;
+                if (dist[u].first + w < dist[v].first) 
+                {
+                    *error = true;
+                    return unordered_map<int, pair<int, vector<int>>>();
+                }
             }
         }
     }

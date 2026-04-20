@@ -11,6 +11,7 @@ Application::Application(int screenWidth, int screenHeight, const char* title) :
 
     srcTCase(10, HEIGHT-10-20, 30, 10, 9),
     targetTCase(10+30+10, HEIGHT-10-20, 30, 10, 9),
+    cyclesCase(50+30+10, HEIGHT-10-20, 30, 10, 9),
 
     dijkstraButton(WIDTH/2-100-10, HEIGHT-20-15, 100, 20, "Dijkstra", 20),
     fordButton(WIDTH/2+10, HEIGHT-20-15, 100, 20, "Bellman-Ford", 13)
@@ -34,6 +35,8 @@ Application::Application(int screenWidth, int screenHeight, const char* title) :
     srcTCase.setTitle("From");
     targetTCase.setValid(tempSet);
     targetTCase.setTitle("To");
+    cyclesCase.setValid(tempSet);
+    cyclesCase.setTitle("Cycles");
 
     // First Scaling
     float xScale = (float)GetScreenWidth()/(float)WIDTH;
@@ -50,6 +53,7 @@ Application::Application(int screenWidth, int screenHeight, const char* title) :
 
     srcTCase.setScale(xScale, yScale);
     targetTCase.setScale(xScale, yScale);
+    cyclesCase.setScale(xScale, yScale);
     dijkstraButton.setScale(xScale, yScale);
     fordButton.setScale(xScale, yScale);
 }
@@ -98,9 +102,18 @@ void Application::Loop()
 
         bool err;
         if (dijkstraB)
+        {
             dist = graph.dijkstra(src, &err);
+        }
         if (fordB)
-            dist = graph.bellmanFord(src, &err);
+        {
+            int cycles = INT_MAX;
+            tempString = cyclesCase.getText();
+            if (tempString.empty()) cycles = INT_MAX;
+            else cycles = std::stoi(tempString);
+
+            dist = graph.bellmanFord(src, cycles, &err);
+        }
 
         //Output
         ow = new OutputWindow(WIDTH, HEIGHT);
@@ -148,9 +161,10 @@ void Application::Loop()
         directionCheckbox.event();
         // Weight input
         weightTCase.event(); 
-        // Src and Target input
+        // Src and Target and Cycles input
         srcTCase.event();
         targetTCase.event();
+        cyclesCase.event();
         // Default graphs inputs
         if (defButton1.pressed())
             randomGraph(5, true);
@@ -253,6 +267,7 @@ void Application::Loop()
 
         srcTCase.setScale(xScale, yScale);
         targetTCase.setScale(xScale, yScale);
+        cyclesCase.setScale(xScale, yScale);
         dijkstraButton.setScale(xScale, yScale);
         fordButton.setScale(xScale, yScale);
         if (ow) ow->setScale(xScale, yScale);
@@ -285,6 +300,7 @@ void Application::Render()
         
         srcTCase.render();
         targetTCase.render();
+        cyclesCase.render();
         dijkstraButton.render();
         fordButton.render();
         if (ow) ow->render();

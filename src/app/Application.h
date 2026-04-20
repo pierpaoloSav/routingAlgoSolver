@@ -39,6 +39,7 @@ private:
     
     TextCase srcTCase;
     TextCase targetTCase;
+    TextCase cyclesCase;
     Button dijkstraButton;
     Button fordButton;
     
